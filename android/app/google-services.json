@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1013204233475",
+    "project_id": "jamnotes",
+    "storage_bucket": "jamnotes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1013204233475:android:f1cee4475c4aea7f658d36",
+        "android_client_info": {
+          "package_name": "com.jamburger.jamnotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1013204233475-s4s7qtsonrmavp04npkr2jdir2i0c9u6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYhSnSJATRrU8_o5KqU8ptXV_ZY-89cvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1013204233475-s4s7qtsonrmavp04npkr2jdir2i0c9u6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
