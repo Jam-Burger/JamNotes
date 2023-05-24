@@ -1,6 +1,8 @@
+import 'dart:developer' as devtools show log;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
+import 'package:jamnotes/constants/routes.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -34,7 +36,7 @@ class _MainViewState extends State<MainView> {
                     await FirebaseAuth.instance.signOut();
                     if (context.mounted) {
                       Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/login/',
+                        loginRoute,
                         (route) => false,
                       );
                     }
@@ -46,12 +48,14 @@ class _MainViewState extends State<MainView> {
           )
         ],
       ),
-      body: const Text('all notes goes here'),
+      body: const Text('all notes goes here and only here!'),
     );
   }
 }
 
-enum MenuAction { logout }
+enum MenuAction {
+  logout,
+}
 
 Future<bool> showLogoutDialog(BuildContext context) {
   return showDialog<bool>(

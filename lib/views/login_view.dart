@@ -1,6 +1,9 @@
+import 'dart:developer' as devtools show log;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
+import 'package:jamnotes/constants/routes.dart';
+import 'package:jamnotes/utilities/showAlertDialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -12,9 +15,11 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+
   @override
   void initState() {
-    _email = TextEditingController();
+    _email =
+        TextEditingController(text: FirebaseAuth.instance.currentUser?.email);
     _password = TextEditingController();
     super.initState();
   }
@@ -52,24 +57,66 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () async {
               final email = _email.text;
               final password = _password.text;
+              if (email.isEmpty || password.isEmpty) {
+                if (context.mounted) {
+                  showAlertDialog(
+                    context,
+                    'An Error Occured!',
+                    'Enter all the details',
+                  );
+                }
+                return;
+              }
               try {
                 await FirebaseAuth.instance.signInWithEmailAndPassword(
                   email: email,
                   password: password,
                 );
-                if (context.mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/main/',
-                    (route) => false,
-                  );
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  if (user.emailVerified) {
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        mainRoute,
+                        (route) => false,
+                      );
+                    }
+                  } else {
+                    if (context.mounted) {
+                      showAlertDialog(
+                        context,
+                        'User Not Varified',
+                        'Varify yourself first',
+                      );
+                    }
+                    devtools.log('Varify yourself first');
+                  }
                 }
               } on FirebaseAuthException catch (e) {
-                if (e.code == 'user-not-found') {
-                  devtools.log('User not found');
-                } else if (e.code == 'wrong-password') {
-                  devtools.log('Wrong Password');
-                } else {
-                  devtools.log(e.code);
+                String message;
+                switch (e.code) {
+                  case 'user-not-found':
+                    message = 'User is not found\nRegigister yourself first';
+                    devtools.log('User not found');
+                    break;
+                  case 'wrong-password':
+                    message = 'The password entered is wrong';
+                    devtools.log('Wrong password');
+                    break;
+                  case 'invalid-email':
+                    message = 'The email foemat is invalid';
+                    devtools.log('Invalid email');
+                    break;
+                  default:
+                    message = 'Unknown error : ${e.code}';
+                    devtools.log(e.code);
+                }
+                if (context.mounted) {
+                  showAlertDialog(
+                    context,
+                    'An Error Occured!',
+                    message,
+                  );
                 }
               }
             },
@@ -79,7 +126,7 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () {
               if (context.mounted) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/register/',
+                  registerRoute,
                   (route) => false,
                 );
               }

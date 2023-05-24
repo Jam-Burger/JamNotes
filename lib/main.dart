@@ -1,8 +1,10 @@
+import 'dart:developer' as devtools show log;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:jamnotes/constants/routes.dart';
 import 'package:jamnotes/firebase_options.dart';
-import 'package:jamnotes/views/email_varification_view.dart';
 import 'package:jamnotes/views/login_view.dart';
 import 'package:jamnotes/views/main_view.dart';
 import 'package:jamnotes/views/register_view.dart';
@@ -19,9 +21,9 @@ void main() {
     ),
     home: const Homepage(),
     routes: {
-      '/login/': (context) => const LoginView(),
-      '/register/': (context) => const RegisterView(),
-      '/main/': (context) => const MainView(),
+      loginRoute: (context) => const LoginView(),
+      registerRoute: (context) => const RegisterView(),
+      mainRoute: (context) => const MainView(),
     },
   ));
 }
@@ -33,7 +35,8 @@ class Homepage extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform),
+        options: DefaultFirebaseOptions.currentPlatform,
+      ),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
@@ -42,7 +45,8 @@ class Homepage extends StatelessWidget {
               if (user.emailVerified) {
                 return const MainView();
               } else {
-                return const EmailVarificationView();
+                devtools.log('Varify yourself and login then');
+                return const LoginView();
               }
             } else {
               return const LoginView();

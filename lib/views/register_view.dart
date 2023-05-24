@@ -1,6 +1,9 @@
+import 'dart:developer' as devtools show log;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
+import 'package:jamnotes/constants/routes.dart';
+import 'package:jamnotes/utilities/showAlertDialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -12,6 +15,7 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+
   @override
   void initState() {
     _email = TextEditingController();
@@ -52,22 +56,58 @@ class _RegisterViewState extends State<RegisterView> {
             onPressed: () async {
               final email = _email.text;
               final password = _password.text;
+              if (email.isEmpty || password.isEmpty) {
+                if (context.mounted) {
+                  showAlertDialog(
+                    context,
+                    'An Error Occured!',
+                    'Enter all the details',
+                  );
+                }
+                return;
+              }
               try {
-                final userCredential =
-                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                await FirebaseAuth.instance.createUserWithEmailAndPassword(
                   email: email,
                   password: password,
                 );
-                devtools.log(userCredential.toString());
+                final user = FirebaseAuth.instance.currentUser;
+                await user?.sendEmailVerification().then((value) {
+                  devtools.log('Email sent successfully to $email!');
+                });
+                if (context.mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    loginRoute,
+                    (route) => false,
+                  );
+                }
               } on FirebaseAuthException catch (e) {
-                if (e.code == 'weak-password') {
-                  devtools.log('Weak password');
-                } else if (e.code == 'email-already-in-use') {
-                  devtools.log('Email is already in use');
-                } else if (e.code == 'invalid-email') {
-                  devtools.log('Invalid Email');
-                } else {
-                  devtools.log(e.code);
+                String message;
+                switch (e.code) {
+                  case 'weak-password':
+                    message =
+                        'The password is weak\nTry to enter a stronger one';
+                    devtools.log('Weak password');
+                    break;
+                  case 'email-already-in-use':
+                    message =
+                        'The email is already in use\nLogin or use a different email';
+                    devtools.log('Email is already in use');
+                    break;
+                  case 'invalid-email':
+                    message = 'The email foemat is invalid';
+                    devtools.log('Invalid Email');
+                    break;
+                  default:
+                    message = 'Unknown error : ${e.code}';
+                    devtools.log(e.code);
+                }
+                if (context.mounted) {
+                  showAlertDialog(
+                    context,
+                    'An Error Occured!',
+                    message,
+                  );
                 }
               }
             },
@@ -76,7 +116,7 @@ class _RegisterViewState extends State<RegisterView> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pushNamedAndRemoveUntil(
-                '/login/',
+                loginRoute,
                 (route) => false,
               );
             },
